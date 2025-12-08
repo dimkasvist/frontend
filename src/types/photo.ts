@@ -21,6 +21,7 @@ export interface Photo {
   author: Author;
   likesCount: number;
   commentsCount: number;
+  liked?: boolean;
 }
 
 export interface Comment {
@@ -28,6 +29,8 @@ export interface Comment {
   text: string;
   createdAt: string;
   author: Author;
+  likesCount: number;
+  liked: boolean;
 }
 
 export interface CommentsResponse {
@@ -38,6 +41,11 @@ export interface CommentsResponse {
 }
 
 export interface LikeResponse {
+  liked: boolean;
+  likesCount: number;
+}
+
+export interface CommentLikeResponse {
   liked: boolean;
   likesCount: number;
 }

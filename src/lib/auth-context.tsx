@@ -3,14 +3,15 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
-interface User {
+interface AuthUser {
+  id?: number | null;
   email: string;
   name: string;
   picture: string;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   token: string | null;
   isLoading: boolean;
   login: (credential: string) => Promise<void>;
@@ -27,31 +28,63 @@ interface GoogleJwtPayload {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const syncUserProfile = async (authToken: string) => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+      const res = await fetch(`${apiUrl}/users/me`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      if (res.ok) {
+        const dbUser = await res.json();
+        setUser((prev) => {
+          const fallback: AuthUser = prev ?? {
+            id: dbUser.id,
+            email: dbUser.email || '',
+            name: dbUser.displayName || 'Без имени',
+            picture: dbUser.avatarUrl || '',
+          };
+          return {
+            ...fallback,
+            id: dbUser.id,
+            name: dbUser.displayName || fallback.name,
+            picture: dbUser.avatarUrl || fallback.picture,
+          };
+        });
+      }
+    } catch (error) {
+      console.error('Failed to sync user profile:', error);
+    }
+  };
+
   useEffect(() => {
-    const savedToken = localStorage.getItem('google_token');
-    if (savedToken) {
-      try {
-        const decoded = jwtDecode<GoogleJwtPayload>(savedToken);
-        // Check if token is expired
-        if (decoded.exp * 1000 > Date.now()) {
-          setToken(savedToken);
-          setUser({
-            email: decoded.email,
-            name: decoded.name,
-            picture: decoded.picture,
-          });
-        } else {
+    const init = async () => {
+      const savedToken = localStorage.getItem('google_token');
+      if (savedToken) {
+        try {
+          const decoded = jwtDecode<GoogleJwtPayload>(savedToken);
+          if (decoded.exp * 1000 > Date.now()) {
+            setToken(savedToken);
+            setUser({
+              id: null,
+              email: decoded.email,
+              name: decoded.name,
+              picture: decoded.picture,
+            });
+            await syncUserProfile(savedToken);
+          } else {
+            localStorage.removeItem('google_token');
+          }
+        } catch {
           localStorage.removeItem('google_token');
         }
-      } catch {
-        localStorage.removeItem('google_token');
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    };
+    init();
   }, []);
 
   const login = async (credential: string) => {
@@ -60,20 +93,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('google_token', credential);
       setToken(credential);
       setUser({
+        id: null,
         email: decoded.email,
         name: decoded.name,
         picture: decoded.picture,
       });
 
-      // Вызываем /users/me чтобы создать пользователя в БД
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-      const res = await fetch(`${apiUrl}/users/me`, {
-        headers: { Authorization: `Bearer ${credential}` },
-      });
-      if (res.ok) {
-        const dbUser = await res.json();
-        console.log('User synced with DB:', dbUser);
-      }
+      await syncUserProfile(credential);
     } catch (error) {
       console.error('Failed to decode token:', error);
     }

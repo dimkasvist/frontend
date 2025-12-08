@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
 import { Photo } from '@/types/photo';
 import { getImageUrl, getVideoUrl } from '@/lib/api';
 import { MoreHorizontal, Play } from 'lucide-react';
@@ -59,29 +60,31 @@ export default function PhotoCard({ photo, onClick }: PhotoCardProps) {
     setGifPosterSrc(src);
   }, [gifStillUrl, gifStillFallback, photo.posterUrl]);
 
-  const handleHover = (shouldPlay: boolean) => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (shouldPlay) {
-      video.play().catch(() => {});
-    } else {
-      video.pause();
-      video.currentTime = 0;
+  const handleMouseEnter = () => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.play().catch(() => {});
     }
+    if (isGif) setIsGifPlaying(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (isVideo && videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+    if (isGif) setIsGifPlaying(false);
   };
 
   return (
-    <div
+    <motion.div
       className="mb-4 break-inside-avoid cursor-zoom-in group"
       onClick={onClick}
-      onMouseEnter={() => {
-        handleHover(true);
-        if (isGif) setIsGifPlaying(true);
-      }}
-      onMouseLeave={() => {
-        handleHover(false);
-        if (isGif) setIsGifPlaying(false);
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: [0.33, 1, 0.68, 1] }}
+      layout
     >
       <div
         className="relative w-full rounded-2xl overflow-hidden bg-gray-200"
@@ -99,6 +102,7 @@ export default function PhotoCard({ photo, onClick }: PhotoCardProps) {
               muted
               loop
               playsInline
+              preload="metadata"
             />
             <div className="absolute top-2 left-2 flex items-center gap-2 bg-black/60 text-white text-xs font-semibold px-3 py-1 rounded-full backdrop-blur">
               <Play className="w-4 h-4" />
@@ -152,6 +156,6 @@ export default function PhotoCard({ photo, onClick }: PhotoCardProps) {
           <MoreHorizontal className="w-4 h-4 text-gray-700" />
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }

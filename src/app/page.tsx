@@ -1,12 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Photo } from '@/types/photo';
 import { getFeed } from '@/lib/api';
 import Header from '@/components/Header';
 import PhotoGrid from '@/components/PhotoGrid';
 import UploadModal from '@/components/UploadModal';
 import PhotoModal from '@/components/PhotoModal';
+import { motion } from 'framer-motion';
+import { useAuth } from '@/lib/auth-context';
 
 export default function Home() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -15,11 +17,17 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const firstRenderRef = useRef(true);
+  const { token } = useAuth();
 
   const loadPhotos = useCallback(async (nextCursor?: string | null, reset: boolean = false) => {
     setLoading(true);
     try {
-      const response = await getFeed(reset ? null : nextCursor, 20);
+      const response = await getFeed({
+        cursor: reset ? null : nextCursor,
+        size: 20,
+        token,
+      });
       setPhotos(prev => reset ? response.items : [...prev, ...response.items]);
       setHasMore(response.hasMore);
       setCursor(response.nextCursor);
@@ -27,8 +35,11 @@ export default function Home() {
       console.error('Error loading photos:', error);
     } finally {
       setLoading(false);
+      if (firstRenderRef.current) {
+        firstRenderRef.current = false;
+      }
     }
-  }, []);
+  }, [token]);
 
   useEffect(() => {
     loadPhotos(null, true);
@@ -52,15 +63,21 @@ export default function Home() {
     <div className="min-h-screen bg-[var(--background)] transition-colors">
       <Header onUploadClick={() => setUploadModalOpen(true)} />
       
-      <main className="pt-20 pb-8">
+      <motion.main
+        className="pt-20 pb-8"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+      >
         <PhotoGrid
           photos={photos}
           loading={loading}
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           onPhotoClick={setSelectedPhoto}
+          showInitialSkeleton={firstRenderRef.current && loading}
         />
-      </main>
+      </motion.main>
 
       <UploadModal
         isOpen={uploadModalOpen}

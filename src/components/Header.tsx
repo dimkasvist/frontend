@@ -59,12 +59,14 @@ export default function Header({ onUploadClick }: HeaderProps) {
     <header className="fixed top-0 left-0 right-0 h-16 bg-[var(--header-bg)] shadow-sm z-50 transition-colors">
       <div className="h-full mx-auto px-4 flex items-center">
         {/* Logo */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-lg">D</span>
+        <Link href="/" className="flex items-center gap-2 shrink-0 group/logo">
+          <div className="w-9 h-9 rounded-full overflow-hidden border border-red-500/30 shadow-sm">
+            <Image src="/icon.jpg" alt="Димкасвист" width={36} height={36} priority className="w-full h-full object-cover" />
           </div>
-          <span className="text-red-500 font-bold text-xl hidden sm:block">Dimkasvist</span>
-        </div>
+          <span className="text-red-500 font-bold text-xl hidden sm:block">
+            Димкасвист
+          </span>
+        </Link>
 
         {/* Search - centered */}
         <div className="flex-1 flex justify-center px-4">
@@ -166,14 +168,16 @@ export default function Header({ onUploadClick }: HeaderProps) {
                     <p className="font-medium truncate">{user.name}</p>
                     <p className="text-sm text-[var(--text-secondary)] truncate">{user.email}</p>
                   </div>
-                  <Link
-                    href="/profile"
-                    onClick={() => setShowMenu(false)}
-                    className="w-full px-4 py-2 text-left hover:bg-[var(--input-bg)] flex items-center gap-2 transition-colors"
-                  >
-                    <UserIcon className="w-4 h-4" />
-                    Мой профиль
-                  </Link>
+                  {user && (
+                    <Link
+                      href={`/users/${user.id || ''}`}
+                      onClick={() => setShowMenu(false)}
+                      className="w-full px-4 py-2 text-left hover:bg-[var(--input-bg)] flex items-center gap-2 transition-colors"
+                    >
+                      <UserIcon className="w-4 h-4" />
+                      Мой профиль
+                    </Link>
+                  )}
                   <button
                     onClick={() => { logout(); setShowMenu(false); }}
                     className="w-full px-4 py-2 text-left hover:bg-[var(--input-bg)] flex items-center gap-2 text-red-500 transition-colors"

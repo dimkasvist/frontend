@@ -21,6 +21,7 @@ export default function UploadModal({ isOpen, onClose, onSuccess }: UploadModalP
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { token } = useAuth();
 
   if (!isOpen) return null;
 
@@ -73,8 +74,6 @@ export default function UploadModal({ isOpen, onClose, onSuccess }: UploadModalP
       processFile(e.dataTransfer.files[0]);
     }
   };
-
-  const { token } = useAuth();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

@@ -1,5 +1,14 @@
 import axios from 'axios';
-import { Photo, PhotoFeedResponse, LikesFeedResponse, User, LikeResponse, CommentsResponse, Comment } from '@/types/photo';
+import {
+  Photo,
+  PhotoFeedResponse,
+  LikesFeedResponse,
+  User,
+  LikeResponse,
+  CommentsResponse,
+  Comment,
+  CommentLikeResponse,
+} from '@/types/photo';
 
 // Используем относительный базовый путь, чтобы проходить через rewrite Next.js и избегать CORS при разработке.
 // Для продакшена можно задать абсолютный домен через NEXT_PUBLIC_API_URL.
@@ -10,12 +19,28 @@ const api = axios.create({
 });
 
 // Публичные эндпоинты
-export async function getFeed(cursor?: string | null, size: number = 20): Promise<PhotoFeedResponse> {
-  const params: { size: number; cursor?: string } = { size };
+interface FeedParams {
+  cursor?: string | null;
+  size?: number;
+  authorId?: number;
+  token?: string | null;
+}
+
+export async function getFeed(params: FeedParams = {}): Promise<PhotoFeedResponse> {
+  const { cursor, size = 20, authorId, token } = params;
+  const query: { size: number; cursor?: string; authorId?: number } = {
+    size,
+  };
   if (cursor) {
-    params.cursor = cursor;
+    query.cursor = cursor;
   }
-  const response = await api.get<PhotoFeedResponse>('/media/feed', { params });
+  if (authorId) {
+    query.authorId = authorId;
+  }
+  const response = await api.get<PhotoFeedResponse>('/media/feed', {
+    params: query,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
   return response.data;
 }
 
@@ -113,17 +138,44 @@ export async function getMyLikedMedia(
   return response.data;
 }
 
+interface UserLikedOptions {
+  cursor?: string | null;
+  size?: number;
+  token?: string;
+}
+
+export async function getUserLikedMedia(
+  userId: number,
+  options: UserLikedOptions = {}
+): Promise<LikesFeedResponse> {
+  const { cursor, size = 20, token } = options;
+  const params: { size: number; cursor?: string } = { size };
+  if (cursor) {
+    params.cursor = cursor;
+  }
+
+  const response = await api.get<LikesFeedResponse>(`/users/${userId}/likes`, {
+    params,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
 // Комментарии
 export async function getComments(
   photoId: number,
   cursor?: string | null,
-  size: number = 20
+  size: number = 20,
+  token?: string | null
 ): Promise<CommentsResponse> {
   const params: { size: number; cursor?: string } = { size };
   if (cursor) {
     params.cursor = cursor;
   }
-  const response = await api.get<CommentsResponse>(`/media/${photoId}/comments`, { params });
+  const response = await api.get<CommentsResponse>(`/media/${photoId}/comments`, {
+    params,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
   return response.data;
 }
 
@@ -144,4 +196,18 @@ export async function deleteComment(commentId: number, token: string): Promise<v
   await api.delete(`/comments/${commentId}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+}
+
+export async function toggleCommentLike(commentId: number, token: string): Promise<CommentLikeResponse> {
+  const response = await api.post<CommentLikeResponse>(`/comments/${commentId}/likes`, null, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function getCommentLikeStatus(commentId: number, token: string): Promise<CommentLikeResponse> {
+  const response = await api.get<CommentLikeResponse>(`/comments/${commentId}/likes`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
 }
