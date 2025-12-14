@@ -38,7 +38,7 @@ export default function Header({ onUploadClick }: HeaderProps) {
   };
 
   return (
-    <header className="fixed top-0 left-20 right-0 h-16 bg-white dark:bg-[#111] border-b border-[var(--border-color)] z-50 transition-colors">
+    <header className="fixed top-0 left-20 right-0 h-16 bg-[var(--header-bg)] border-b border-[var(--border-color)] z-50 transition-colors">
       <div className="h-full mx-auto px-6 flex items-center justify-between gap-4">
         {/* Empty space for balance */}
         <div className="w-10" />
