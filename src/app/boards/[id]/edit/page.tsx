@@ -56,14 +56,14 @@ export default function EditBoardPage() {
   };
 
   const handleSave = async () => {
-    if (!token || !formData.name.trim() || saving) return;
+    if (!token || !formData.name || !formData.name.trim() || saving) return;
     
     setSaving(true);
     try {
       await updateBoard(
         boardId,
         {
-          name: formData.name.trim(),
+          name: formData.name?.trim() || '',
           description: formData.description?.trim() || undefined,
           isPrivate: formData.isPrivate,
         },
