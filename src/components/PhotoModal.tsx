@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { X, Trash2, Download, Loader2, User, Heart, MessageCircle, MoreHorizontal, Send } from 'lucide-react';
+import { X, Trash2, Download, Loader2, User, Heart, MessageCircle, MoreHorizontal, Send, Share2, Expand } from 'lucide-react';
 import { Photo, Comment } from '@/types/photo';
 import {
   getImageUrl,
@@ -19,6 +19,8 @@ import { getAvatarUrl } from '@/lib/avatar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
+import ShareButton from './ShareButton';
+import SaveToBoard from './SaveToBoard';
 
 interface PhotoModalProps {
   photo: Photo | null;
@@ -31,6 +33,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showFullscreen, setShowFullscreen] = useState(false);
   
   // Likes state
   const [liked, setLiked] = useState(false);
@@ -253,7 +256,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
             transition={{ type: 'spring', stiffness: 260, damping: 25 }}
           >
             {/* Image */}
-            <div className="flex-1 bg-[var(--card-bg)] flex items-center justify-center min-h-[300px] md:min-h-[600px] overflow-hidden">
+            <div className="flex-1 bg-[var(--card-bg)] flex items-center justify-center min-h-[300px] md:min-h-[600px] overflow-hidden relative group/image">
               <div className="relative w-full h-full min-h-[300px] md:min-h-[600px]">
                 {photo.mediaType === 'VIDEO' ? (
                   <video
@@ -276,7 +279,52 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                   />
                 )}
               </div>
+              
+              {/* Expand button */}
+              <button
+                onClick={() => setShowFullscreen(true)}
+                className="absolute bottom-4 right-4 p-3 bg-[var(--card-bg)]/90 hover:bg-[var(--card-bg)] backdrop-blur rounded-full shadow-lg transition-all opacity-0 group-hover/image:opacity-100"
+                title="Открыть в полном размере"
+              >
+                <Expand className="w-5 h-5 text-[var(--foreground)]" />
+              </button>
             </div>
+
+            {/* Fullscreen overlay */}
+            {showFullscreen && (
+              <div 
+                className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+                onClick={() => setShowFullscreen(false)}
+              >
+                <button
+                  onClick={() => setShowFullscreen(false)}
+                  className="absolute top-4 right-4 p-3 bg-white/10 hover:bg-white/20 backdrop-blur rounded-full transition-colors z-10"
+                >
+                  <X className="w-6 h-6 text-white" />
+                </button>
+                <div className="relative w-full h-full p-8 flex items-center justify-center">
+                  {photo.mediaType === 'VIDEO' ? (
+                    <video
+                      src={getVideoUrl(photo.url)}
+                      poster={getImageUrl(photo.posterUrl || photo.url)}
+                      className="max-w-full max-h-full object-contain"
+                      controls
+                      autoPlay
+                      loop
+                      playsInline
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <img
+                      src={getImageUrl(photo.url)}
+                      alt={photo.title}
+                      className="max-w-full max-h-full object-contain"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Info panel */}
             <div className="w-full md:w-[400px] flex flex-col overflow-hidden">
@@ -306,6 +354,9 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                     )}
                   </button>
                   
+                  {/* Save to Board */}
+                  <SaveToBoard mediaId={photo.id} variant="icon" />
+                  
                   {/* Download */}
                   <button
                     onClick={handleDownload}
@@ -314,6 +365,9 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                   >
                     <Download className="w-6 h-6 text-[var(--foreground)]" />
                   </button>
+                  
+                  {/* Share */}
+                  <ShareButton mediaId={photo.id} variant="icon" />
                   
                   {/* More options */}
                   <button className="p-2 hover:bg-[var(--input-bg)] rounded-full transition-colors">

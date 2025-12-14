@@ -8,6 +8,19 @@ import {
   CommentsResponse,
   Comment,
   CommentLikeResponse,
+  Board,
+  BoardsResponse,
+  BoardMediaResponse,
+  BoardMediaItem,
+  CreateBoardRequest,
+  UpdateBoardRequest,
+  Follow,
+  FollowListResponse,
+  FollowStats,
+  Notification,
+  NotificationListResponse,
+  NotificationSettings,
+  UpdateNotificationSettingsRequest,
 } from '@/types/photo';
 
 // Используем относительный базовый путь, чтобы проходить через rewrite Next.js и избегать CORS при разработке.
@@ -39,6 +52,29 @@ export async function getFeed(params: FeedParams = {}): Promise<PhotoFeedRespons
   }
   const response = await api.get<PhotoFeedResponse>('/media/feed', {
     params: query,
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+interface SearchParams {
+  query: string;
+  cursor?: string | null;
+  size?: number;
+  token?: string | null;
+}
+
+export async function searchMedia(params: SearchParams): Promise<PhotoFeedResponse> {
+  const { query, cursor, size = 20, token } = params;
+  const searchParams: { q: string; size: number; cursor?: string } = {
+    q: query,
+    size,
+  };
+  if (cursor) {
+    searchParams.cursor = cursor;
+  }
+  const response = await api.get<PhotoFeedResponse>('/media/search', {
+    params: searchParams,
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
   return response.data;
@@ -207,6 +243,175 @@ export async function toggleCommentLike(commentId: number, token: string): Promi
 
 export async function getCommentLikeStatus(commentId: number, token: string): Promise<CommentLikeResponse> {
   const response = await api.get<CommentLikeResponse>(`/comments/${commentId}/likes`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+// Boards
+export async function createBoard(data: CreateBoardRequest, token: string): Promise<Board> {
+  const response = await api.post<Board>('/boards', data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function updateBoard(id: number, data: UpdateBoardRequest, token: string): Promise<Board> {
+  const response = await api.put<Board>(`/boards/${id}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function getBoard(id: number, token?: string | null): Promise<Board> {
+  const response = await api.get<Board>(`/boards/${id}`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+export async function getMyBoards(page: number = 0, size: number = 20, token: string): Promise<BoardsResponse> {
+  const response = await api.get<BoardsResponse>('/boards/my', {
+    params: { page, size },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function getUserBoards(userId: number, page: number = 0, size: number = 20, token?: string | null): Promise<BoardsResponse> {
+  const response = await api.get<BoardsResponse>(`/boards/user/${userId}`, {
+    params: { page, size },
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+export async function deleteBoard(id: number, token: string): Promise<void> {
+  await api.delete(`/boards/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function addMediaToBoard(boardId: number, mediaId: number, token: string): Promise<BoardMediaItem> {
+  const response = await api.post<BoardMediaItem>(`/boards/${boardId}/media/${mediaId}`, null, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function removeMediaFromBoard(boardId: number, mediaId: number, token: string): Promise<void> {
+  await api.delete(`/boards/${boardId}/media/${mediaId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function getBoardMedia(boardId: number, page: number = 0, size: number = 20, token?: string | null): Promise<BoardMediaResponse> {
+  const response = await api.get<BoardMediaResponse>(`/boards/${boardId}/media`, {
+    params: { page, size },
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+// ============================================
+// Follow API
+// ============================================
+
+export async function followUser(userId: number, token: string): Promise<Follow> {
+  const response = await api.post<Follow>(`/follow/${userId}`, null, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function unfollowUser(userId: number, token: string): Promise<void> {
+  await api.delete(`/follow/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function checkFollowing(userId: number, token: string): Promise<boolean> {
+  const response = await api.get<boolean>(`/follow/check/${userId}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function getFollowers(userId: number, page: number = 0, size: number = 20, token?: string | null): Promise<FollowListResponse> {
+  const response = await api.get<FollowListResponse>(`/follow/${userId}/followers`, {
+    params: { page, size },
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+export async function getFollowing(userId: number, page: number = 0, size: number = 20, token?: string | null): Promise<FollowListResponse> {
+  const response = await api.get<FollowListResponse>(`/follow/${userId}/following`, {
+    params: { page, size },
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+export async function getFollowStats(userId: number, token?: string | null): Promise<FollowStats> {
+  const response = await api.get<FollowStats>(`/follow/${userId}/stats`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  });
+  return response.data;
+}
+
+// ============================================
+// Notifications API
+// ============================================
+
+export async function getNotifications(page: number = 0, size: number = 20, token: string): Promise<NotificationListResponse> {
+  const response = await api.get<NotificationListResponse>('/notifications', {
+    params: { page, size },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function getUnreadNotifications(page: number = 0, size: number = 20, token: string): Promise<NotificationListResponse> {
+  const response = await api.get<NotificationListResponse>('/notifications/unread', {
+    params: { page, size },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function getUnreadCount(token: string): Promise<number> {
+  const response = await api.get<number>('/notifications/unread/count', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function markNotificationAsRead(notificationId: number, token: string): Promise<void> {
+  await api.put(`/notifications/${notificationId}/read`, null, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export async function markAllNotificationsAsRead(token: string): Promise<void> {
+  await api.put('/notifications/read-all', null, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// ============================================
+// Notification Settings API
+// ============================================
+
+export async function getNotificationSettings(token: string): Promise<NotificationSettings> {
+  const response = await api.get<NotificationSettings>('/notification-settings', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
+export async function updateNotificationSettings(settings: UpdateNotificationSettingsRequest, token: string): Promise<NotificationSettings> {
+  const response = await api.put<NotificationSettings>('/notification-settings', settings, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;

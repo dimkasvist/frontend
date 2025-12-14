@@ -77,3 +77,112 @@ export interface UploadPhotoRequest {
   title: string;
   description?: string;
 }
+
+export interface Board {
+  id: number;
+  name: string;
+  description: string | null;
+  isPrivate: boolean;
+  user: User;
+  mediaCount: number;
+  coverImageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BoardsResponse {
+  boards: Board[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface BoardMediaItem {
+  id: number;
+  media: Photo;
+  addedAt: string;
+}
+
+export interface BoardMediaResponse {
+  items: BoardMediaItem[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface CreateBoardRequest {
+  name: string;
+  description?: string;
+  isPrivate: boolean;
+}
+
+export interface UpdateBoardRequest {
+  name?: string;
+  description?: string;
+  isPrivate?: boolean;
+}
+
+// Follow types
+export interface Follow {
+  id: number;
+  user: User;
+  createdAt: string;
+}
+
+export interface FollowListResponse {
+  follows: Follow[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface FollowStats {
+  followersCount: number;
+  followingCount: number;
+}
+
+// Notification types
+export type NotificationType = 'LIKE' | 'COMMENT' | 'COMMENT_LIKE' | 'NEW_PIN_FROM_FOLLOWING';
+
+export interface Notification {
+  id: number;
+  type: NotificationType;
+  actor: User;
+  media?: Photo;
+  commentId?: number;
+  isRead: boolean;
+  createdAt: string;
+  message: string;
+}
+
+export interface NotificationListResponse {
+  notifications: Notification[];
+  unreadCount: number;
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+// Notification Settings types
+export interface NotificationSettings {
+  id: number;
+  notificationsEnabled: boolean;
+  emailNotificationsEnabled: boolean;
+  likeNotifications: boolean;
+  commentNotifications: boolean;
+  commentLikeNotifications: boolean;
+  newPinNotifications: boolean;
+}
+
+export interface UpdateNotificationSettingsRequest {
+  notificationsEnabled?: boolean;
+  emailNotificationsEnabled?: boolean;
+  likeNotifications?: boolean;
+  commentNotifications?: boolean;
+  commentLikeNotifications?: boolean;
+  newPinNotifications?: boolean;
+}
