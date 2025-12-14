@@ -218,7 +218,7 @@ export default function EditBoardPage() {
             <div className="flex gap-3 pt-4">
               <button
                 onClick={handleSave}
-                disabled={saving || !formData.name.trim()}
+                disabled={saving || !formData.name || !formData.name.trim()}
                 className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {saving ? (
