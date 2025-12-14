@@ -179,7 +179,7 @@ export default function UserProfilePage() {
       <Sidebar onCreateClick={() => {}} />
       <Header onUploadClick={() => {}} />
 
-      <main className="ml-20 pt-20 pb-12 px-3 sm:px-6 max-w-6xl mx-auto">
+      <main className="ml-20 pt-20 pb-12 px-3 sm:px-6">
         <section className="bg-[var(--card-bg)] border border-[var(--border-color)] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-8">
           <div className="relative w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-red-500 to-orange-400 flex items-center justify-center shrink-0">
             {avatar ? (
