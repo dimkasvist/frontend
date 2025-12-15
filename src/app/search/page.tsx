@@ -87,7 +87,7 @@ function SearchContent() {
           <div className="max-w-xl mx-auto text-center">
             <SearchIcon className="w-16 h-16 text-[var(--text-secondary)] mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-[var(--foreground)] mb-2">
-              Поиск пинов
+              Поиск димов
             </h1>
             <p className="text-[var(--text-secondary)]">
               Введите запрос в строку поиска

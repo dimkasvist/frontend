@@ -175,7 +175,7 @@ export default function SettingsPage() {
                 <SettingToggle
                   icon={<Heart className="w-5 h-5 text-red-500" />}
                   title="Лайки"
-                  description="Когда кто-то лайкает ваш пин"
+                  description="Когда кто-то лайкает ваш дим"
                   checked={settings.likeNotifications}
                   onChange={() => handleToggle('likeNotifications')}
                   disabled={!settings.notificationsEnabled}
@@ -184,7 +184,7 @@ export default function SettingsPage() {
                 <SettingToggle
                   icon={<MessageCircle className="w-5 h-5 text-blue-500" />}
                   title="Комментарии"
-                  description="Когда кто-то комментирует ваш пин"
+                  description="Когда кто-то комментирует ваш дим"
                   checked={settings.commentNotifications}
                   onChange={() => handleToggle('commentNotifications')}
                   disabled={!settings.notificationsEnabled}
@@ -201,8 +201,8 @@ export default function SettingsPage() {
                 
                 <SettingToggle
                   icon={<ImageIcon className="w-5 h-5 text-green-500" />}
-                  title="Новые пины от подписок"
-                  description="Когда пользователь, на которого вы подписаны, публикует новый пин"
+                  title="Новые димы от подписок"
+                  description="Когда пользователь, на которого вы подписаны, публикует новый дим"
                   checked={settings.newPinNotifications}
                   onChange={() => handleToggle('newPinNotifications')}
                   disabled={!settings.notificationsEnabled}

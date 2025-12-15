@@ -80,7 +80,7 @@ export default function PhotoGrid({
     return (
       <div className="flex flex-col items-center justify-center py-20 text-[var(--text-secondary)]">
         <p className="text-xl font-medium">Пока пусто</p>
-        <p className="mt-2 text-base">Добавьте первые пины, чтобы страница ожила</p>
+        <p className="mt-2 text-base">Добавьте первые димы, чтобы страница ожила</p>
       </div>
     );
   }

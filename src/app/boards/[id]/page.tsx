@@ -170,7 +170,7 @@ export default function BoardPage() {
                   <p className="text-[var(--text-secondary)] mb-2">{board.description}</p>
                 )}
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {board.mediaCount} {board.mediaCount === 1 ? 'пин' : 'пинов'} · 
+                  {board.mediaCount} {board.mediaCount === 1 ? 'дим' : 'димов'} · 
                   Создана {new Date(board.createdAt).toLocaleDateString('ru-RU')}
                 </p>
               </div>
@@ -210,10 +210,10 @@ export default function BoardPage() {
             </div>
           ) : photos.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-[var(--text-secondary)] mb-4">В этой доске пока нет пинов</p>
+              <p className="text-[var(--text-secondary)] mb-4">В этой доске пока нет димов</p>
               {isOwner && (
                 <p className="text-sm text-[var(--text-secondary)]">
-                  Нажмите "Сохранить" на пине, чтобы добавить его в доску
+                  Нажмите "Сохранить" на диме, чтобы добавить его в доску
                 </p>
               )}
             </div>

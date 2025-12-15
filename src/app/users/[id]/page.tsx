@@ -335,13 +335,13 @@ export default function UserProfilePage() {
           <div className="flex flex-col gap-4 mb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold">
-                {activeTab === 'created' ? 'Созданные пины' : activeTab === 'liked' ? 'Понравившиеся пины' : 'Доски'}
+                {activeTab === 'created' ? 'Созданные димы' : activeTab === 'liked' ? 'Понравившиеся димы' : 'Доски'}
               </h2>
               <p className="text-sm text-[var(--text-secondary)]">
                 {activeTab === 'created'
                   ? 'Все публикации этого автора'
                   : activeTab === 'liked'
-                  ? 'Пины, которые пользователь сохранил к себе'
+                  ? 'Димы, которые пользователь сохранил к себе'
                   : 'Коллекции досок пользователя'}
               </p>
             </div>
@@ -392,7 +392,7 @@ export default function UserProfilePage() {
                     </p>
                   )}
                   <div className="mt-2 text-xs text-[var(--text-secondary)]">
-                    {board.mediaCount || 0} пинов
+                    {board.mediaCount || 0} димов
                   </div>
                 </Link>
               ))}

@@ -33,7 +33,7 @@ export default function MediaPage() {
       })
       .catch(err => {
         console.error('Failed to load photo:', err);
-        setError('Пин не найден');
+        setError('Дим не найден');
         setLoading(false);
       });
   }, [params.id]);
@@ -61,7 +61,7 @@ export default function MediaPage() {
         <Header onUploadClick={() => setUploadModalOpen(true)} />
         <div className="ml-20 pt-32 flex flex-col items-center justify-center">
           <p className="text-2xl font-bold text-[var(--foreground)] mb-2">
-            {error || 'Пин не найден'}
+            {error || 'Дим не найден'}
           </p>
           <button
             onClick={() => router.push('/')}

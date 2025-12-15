@@ -164,7 +164,7 @@ export default function BoardsPage() {
                       )}
                     </div>
                     <p className="text-sm text-[var(--text-secondary)]">
-                      {board.mediaCount} {board.mediaCount === 1 ? 'пин' : 'пинов'}
+                      {board.mediaCount} {board.mediaCount === 1 ? 'дим' : 'димов'}
                     </p>
                   </div>
                 </Link>

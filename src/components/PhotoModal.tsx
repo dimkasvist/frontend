@@ -542,7 +542,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                 {showEditModal && (
                   <form onSubmit={handleUpdatePhoto} className="mb-4 p-4 bg-[var(--input-bg)] rounded-xl border border-[var(--border-color)]">
                     <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">
-                      Редактировать пин
+                      Редактировать дим
                     </h3>
                     <div className="space-y-3">
                       <div>
