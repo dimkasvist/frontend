@@ -40,10 +40,11 @@ export default function FollowersModal({ userId, initialTab, onClose }: Follower
     setFollowersLoading(true);
     try {
       const res = await getFollowers(userId, page, 20, token || undefined);
+      const users = res.follows.map(f => f.user);
       if (page === 0) {
-        setFollowers(res.users);
+        setFollowers(users);
       } else {
-        setFollowers(prev => [...prev, ...res.users]);
+        setFollowers(prev => [...prev, ...users]);
       }
       setFollowersPage(res.page);
       setFollowersHasMore(res.page < res.totalPages - 1);
@@ -59,10 +60,11 @@ export default function FollowersModal({ userId, initialTab, onClose }: Follower
     setFollowingLoading(true);
     try {
       const res = await getFollowing(userId, page, 20, token || undefined);
+      const users = res.follows.map(f => f.user);
       if (page === 0) {
-        setFollowing(res.users);
+        setFollowing(users);
       } else {
-        setFollowing(prev => [...prev, ...res.users]);
+        setFollowing(prev => [...prev, ...users]);
       }
       setFollowingPage(res.page);
       setFollowingHasMore(res.page < res.totalPages - 1);

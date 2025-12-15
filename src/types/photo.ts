@@ -132,7 +132,7 @@ export interface Follow {
 }
 
 export interface FollowListResponse {
-  users: User[];
+  follows: Follow[];
   page: number;
   size: number;
   totalElements: number;
