@@ -74,7 +74,7 @@ function SearchContent() {
   };
 
   const handlePhotoClick = (photo: Photo) => {
-    router.push(`/media/${photo.id}`);
+    setSelectedPhoto(photo);
   };
 
   if (!query.trim()) {

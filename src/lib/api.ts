@@ -126,6 +126,17 @@ export async function deletePhoto(id: number, token: string): Promise<void> {
   });
 }
 
+export async function updateMedia(
+  id: number,
+  data: { title: string; description?: string },
+  token: string
+): Promise<Photo> {
+  const response = await api.put<Photo>(`/media/${id}`, data, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+}
+
 function makeAbsolute(url: string): string {
   if (url.startsWith('http')) return url;
   if (url.startsWith('/api')) {

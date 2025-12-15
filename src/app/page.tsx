@@ -63,7 +63,7 @@ export default function Home() {
   };
 
   const handlePhotoClick = (photo: Photo) => {
-    router.push(`/media/${photo.id}`);
+    setSelectedPhoto(photo);
   };
 
   return (

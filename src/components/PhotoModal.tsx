@@ -8,6 +8,7 @@ import {
   getImageUrl,
   getVideoUrl,
   deletePhoto,
+  updateMedia,
   toggleLike,
   getLikeStatus,
   getComments,
@@ -34,6 +35,11 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [updating, setUpdating] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   
   // Likes state
   const [liked, setLiked] = useState(false);
@@ -50,6 +56,18 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
   const [commentLikeLoading, setCommentLikeLoading] = useState<Record<number, boolean>>({});
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (photo) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [photo]);
+
   // Reset state when photo changes
   useEffect(() => {
     if (photo) {
@@ -61,6 +79,10 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
       setCommentText('');
       setError(null);
       setShowDeleteConfirm(false);
+      setShowEditModal(false);
+      setShowMoreMenu(false);
+      setEditTitle(photo.title);
+      setEditDescription(photo.description || '');
       
       // Load like status if logged in
       if (token) {
@@ -191,6 +213,42 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
       setCommentsCount(prev => prev - 1);
     } catch (err) {
       console.error('Failed to delete comment:', err);
+    }
+  };
+
+  const handleUpdatePhoto = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token || !photo || !editTitle.trim()) return;
+    
+    setUpdating(true);
+    setError(null);
+    try {
+      const updated = await updateMedia(photo.id, {
+        title: editTitle.trim(),
+        description: editDescription.trim() || undefined,
+      }, token);
+      
+      // Update local photo state
+      Object.assign(photo, {
+        title: updated.title,
+        description: updated.description,
+      });
+      
+      setShowEditModal(false);
+      setShowMoreMenu(false);
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
+        if (axiosError.response?.status === 403) {
+          setError('Вы не можете редактировать чужой дим');
+        } else {
+          setError(axiosError.response?.data?.message || 'Ошибка при обновлении');
+        }
+      } else {
+        setError('Ошибка при обновлении');
+      }
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -370,21 +428,40 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                   <ShareButton mediaId={photo.id} variant="icon" />
                   
                   {/* More options */}
-                  <button className="p-2 hover:bg-[var(--input-bg)] rounded-full transition-colors">
-                    <MoreHorizontal className="w-6 h-6 text-[var(--foreground)]" />
-                  </button>
+                  {currentUser?.id === photo.author?.id && (
+                    <div className="relative">
+                      <button 
+                        onClick={() => setShowMoreMenu(!showMoreMenu)}
+                        className="p-2 hover:bg-[var(--input-bg)] rounded-full transition-colors"
+                      >
+                        <MoreHorizontal className="w-6 h-6 text-[var(--foreground)]" />
+                      </button>
+                      
+                      {showMoreMenu && (
+                        <div className="absolute right-0 top-full mt-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-xl shadow-lg py-1 z-10 min-w-[150px]">
+                          <button
+                            onClick={() => {
+                              setShowEditModal(true);
+                              setShowMoreMenu(false);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-[var(--input-bg)] transition-colors text-[var(--foreground)]"
+                          >
+                            Редактировать
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowDeleteConfirm(true);
+                              setShowMoreMenu(false);
+                            }}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-red-50 transition-colors text-red-500"
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-
-                {/* Delete button */}
-                {currentUser?.id === photo.author?.id && (
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="p-2 hover:bg-red-50 text-red-500 rounded-full transition-colors"
-                    title="Удалить"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                )}
               </div>
 
               {/* Content area */}
@@ -459,6 +536,62 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                       </button>
                     </div>
                   </div>
+                )}
+
+                {/* Edit modal */}
+                {showEditModal && (
+                  <form onSubmit={handleUpdatePhoto} className="mb-4 p-4 bg-[var(--input-bg)] rounded-xl border border-[var(--border-color)]">
+                    <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">
+                      Редактировать пин
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs text-[var(--text-secondary)] mb-1">
+                          Название
+                        </label>
+                        <input
+                          type="text"
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          className="w-full px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-red-500"
+                          maxLength={255}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-[var(--text-secondary)] mb-1">
+                          Описание
+                        </label>
+                        <textarea
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full px-3 py-2 bg-[var(--card-bg)] border border-[var(--border-color)] rounded-lg text-sm text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                          rows={3}
+                          maxLength={1000}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowEditModal(false);
+                          setEditTitle(photo.title);
+                          setEditDescription(photo.description || '');
+                        }}
+                        className="flex-1 py-2 px-4 bg-[var(--border-color)] hover:opacity-80 rounded-full text-sm font-medium text-[var(--foreground)] transition-colors"
+                      >
+                        Отмена
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={updating || !editTitle.trim()}
+                        className="flex-1 py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                      >
+                        {updating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Сохранить'}
+                      </button>
+                    </div>
+                  </form>
                 )}
 
                 {/* Comments section */}
