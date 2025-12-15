@@ -145,7 +145,7 @@ export interface FollowStats {
 }
 
 // Notification types
-export type NotificationType = 'LIKE' | 'COMMENT' | 'COMMENT_LIKE' | 'NEW_PIN_FROM_FOLLOWING';
+export type NotificationType = 'LIKE' | 'COMMENT' | 'COMMENT_LIKE' | 'NEW_PIN_FROM_FOLLOWING' | 'FOLLOW';
 
 export interface Notification {
   id: number;

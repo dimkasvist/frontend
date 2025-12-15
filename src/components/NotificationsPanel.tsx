@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { Notification } from '@/types/photo';
 import { getUnreadNotifications, markNotificationAsRead, markAllNotificationsAsRead, getUnreadCount, getImageUrl } from '@/lib/api';
 import { getAvatarUrl } from '@/lib/avatar';
-import { Bell, Loader2, Heart, MessageCircle, User as UserIcon, Image as ImageIcon, CheckCheck } from 'lucide-react';
+import { Bell, Loader2, Heart, MessageCircle, User as UserIcon, Image as ImageIcon, CheckCheck, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -96,6 +96,8 @@ export default function NotificationsPanel({ isOpen, onClose, unreadCount, onUnr
         return <Heart className="w-5 h-5 text-red-500 fill-red-500" />;
       case 'NEW_PIN_FROM_FOLLOWING':
         return <ImageIcon className="w-5 h-5 text-green-500" />;
+      case 'FOLLOW':
+        return <UserPlus className="w-5 h-5 text-purple-500" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }

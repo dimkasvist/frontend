@@ -10,7 +10,7 @@ import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import UploadModal from '@/components/UploadModal';
 import { motion } from 'framer-motion';
-import { Bell, Loader2, Heart, MessageCircle, User as UserIcon, Image as ImageIcon, CheckCheck } from 'lucide-react';
+import { Bell, Loader2, Heart, MessageCircle, User as UserIcon, Image as ImageIcon, CheckCheck, UserPlus } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -99,6 +99,8 @@ export default function NotificationsPage() {
         return <Heart className="w-5 h-5 text-red-500 fill-red-500" />;
       case 'NEW_PIN_FROM_FOLLOWING':
         return <ImageIcon className="w-5 h-5 text-green-500" />;
+      case 'FOLLOW':
+        return <UserPlus className="w-5 h-5 text-purple-500" />;
       default:
         return <Bell className="w-5 h-5 text-gray-500" />;
     }
