@@ -9,7 +9,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Dimkasvist",
+  title: "Димкасвист",
   description: "Делитесь идеями и находите вдохновение",
   icons: {
     icon: "/icon.jpg",

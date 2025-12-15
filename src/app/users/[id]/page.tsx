@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
 import PhotoModal from '@/components/PhotoModal';
+import FollowersModal from '@/components/FollowersModal';
 import { getUser, getFeed, getUserLikedMedia, followUser, unfollowUser, checkFollowing, getFollowStats, getUserBoards } from '@/lib/api';
 import { getAvatarUrl } from '@/lib/avatar';
 import { Photo, User, Board } from '@/types/photo';
@@ -47,6 +48,8 @@ export default function UserProfilePage() {
   const [likedLoading, setLikedLoading] = useState(false);
 
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [showFollowersModal, setShowFollowersModal] = useState(false);
+  const [followersModalTab, setFollowersModalTab] = useState<'followers' | 'following'>('followers');
   const emptyAttemptsRef = useRef(0);
   const MAX_EMPTY_ATTEMPTS = 5;
   const createdLoadingRef = useRef(false);
@@ -292,14 +295,26 @@ export default function UserProfilePage() {
             
             {/* Follow stats */}
             <div className="flex items-center gap-4 text-sm">
-              <div>
+              <button
+                onClick={() => {
+                  setFollowersModalTab('followers');
+                  setShowFollowersModal(true);
+                }}
+                className="hover:underline transition-all"
+              >
                 <span className="font-semibold text-[var(--foreground)]">{followersCount}</span>
                 <span className="text-[var(--text-secondary)] ml-1">подписчиков</span>
-              </div>
-              <div>
+              </button>
+              <button
+                onClick={() => {
+                  setFollowersModalTab('following');
+                  setShowFollowersModal(true);
+                }}
+                className="hover:underline transition-all"
+              >
                 <span className="font-semibold text-[var(--foreground)]">{followingCount}</span>
                 <span className="text-[var(--text-secondary)] ml-1">подписок</span>
-              </div>
+              </button>
             </div>
             
             {/* Follow button */}
@@ -425,6 +440,14 @@ export default function UserProfilePage() {
         onClose={() => setSelectedPhoto(null)}
         onDelete={handlePhotoDelete}
       />
+
+      {showFollowersModal && (
+        <FollowersModal
+          userId={userId}
+          initialTab={followersModalTab}
+          onClose={() => setShowFollowersModal(false)}
+        />
+      )}
     </div>
   );
 }
