@@ -30,7 +30,7 @@ export interface Message {
   attachmentUrl: string | null;
   sharedMedia?: SharedMediaInfo | null;
   isEdited: boolean;
-  status: MessageStatus;
+  status: MessageStatus | null;
   createdAt: string;
   updatedAt: string;
 }

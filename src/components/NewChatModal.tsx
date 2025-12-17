@@ -51,7 +51,7 @@ export default function NewChatModal({ isOpen, onClose, onSelectUser }: NewChatM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50" onClick={onClose}>
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50" onClick={onClose}>
       <div
         className="bg-[var(--card-bg)] rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden"
         onClick={(e) => e.stopPropagation()}

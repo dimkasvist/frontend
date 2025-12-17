@@ -3,6 +3,7 @@
 import { Message } from '@/types/chat';
 import { Check, CheckCheck, MoreVertical, Edit2, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { formatMessageTime } from '@/lib/date-utils';
 import { useState, useRef, useEffect } from 'react';
 
@@ -111,6 +112,36 @@ export default function MessageBubble({ message, isOwnMessage, onEdit, onDelete 
               </a>
             )}
             {message.content && message.content !== 'Отправлено вложение' && (
+              <p className="mt-2 text-[var(--foreground)]">{message.content}</p>
+            )}
+          </div>
+        );
+      
+      case 'SHARED_POST':
+        return (
+          <div className="mb-2">
+            {message.sharedMedia && (
+              <Link href={`/media/${message.sharedMedia.id}`}>
+                <div className="bg-[var(--input-bg)] rounded-lg overflow-hidden border border-[var(--border-color)] cursor-pointer hover:bg-[var(--border-color)] transition-colors">
+                  {message.sharedMedia.thumbnailUrl && (
+                    <Image
+                      src={message.sharedMedia.thumbnailUrl}
+                      alt={message.sharedMedia.title}
+                      width={300}
+                      height={300}
+                      className="w-full h-auto object-cover"
+                      unoptimized
+                    />
+                  )}
+                  <div className="p-3">
+                    <p className="font-medium text-[var(--foreground)] text-sm">
+                      {message.sharedMedia.title}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )}
+            {message.content && (
               <p className="mt-2 text-[var(--foreground)]">{message.content}</p>
             )}
           </div>

@@ -57,12 +57,6 @@ export default function ChatModal() {
     };
   }, [isOpen, token]);
 
-  useEffect(() => {
-    if (selectedUserId && token) {
-      handleStartChatWithUser(selectedUserId);
-    }
-  }, [selectedUserId, token]);
-
   const loadChats = async () => {
     if (!token) return;
     
@@ -237,6 +231,12 @@ export default function ChatModal() {
       console.error('Error creating chat:', error);
     }
   }, [token, chats]);
+
+  useEffect(() => {
+    if (selectedUserId && token) {
+      handleStartChatWithUser(selectedUserId);
+    }
+  }, [selectedUserId, token, handleStartChatWithUser]);
 
   const handleSendMessage = async (
     content: string,
