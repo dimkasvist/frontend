@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth-context';
-import { X, Trash2, Download, Loader2, User, Heart, MessageCircle, MoreHorizontal, Send, Share2, Expand } from 'lucide-react';
+import { X, Trash2, Download, Loader2, User, Heart, MessageCircle, MoreHorizontal, Send, Share2, Expand, Edit2, Check, XIcon } from 'lucide-react';
 import { Photo, Comment } from '@/types/photo';
 import {
   getImageUrl,
@@ -13,6 +13,7 @@ import {
   getLikeStatus,
   getComments,
   addComment,
+  updateComment,
   deleteComment,
   toggleCommentLike,
 } from '@/lib/api';
@@ -54,6 +55,9 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
   const [submittingComment, setSubmittingComment] = useState(false);
   const [showComments, setShowComments] = useState(true);
   const [commentLikeLoading, setCommentLikeLoading] = useState<Record<number, boolean>>({});
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
+  const [updatingComment, setUpdatingComment] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when modal is open
@@ -210,6 +214,24 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
     }
   };
 
+  const handleEditComment = async (commentId: number) => {
+    if (!token || !editingCommentText.trim() || updatingComment) return;
+    
+    setUpdatingComment(true);
+    try {
+      const updated = await updateComment(commentId, editingCommentText.trim(), token);
+      setComments(prev =>
+        prev.map(c => c.id === commentId ? { ...c, text: updated.text } : c)
+      );
+      setEditingCommentId(null);
+      setEditingCommentText('');
+    } catch (err) {
+      console.error('Failed to update comment:', err);
+    } finally {
+      setUpdatingComment(false);
+    }
+  };
+
   const handleDeleteComment = async (commentId: number) => {
     if (!token) return;
     try {
@@ -219,6 +241,16 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
     } catch (err) {
       console.error('Failed to delete comment:', err);
     }
+  };
+
+  const startEditComment = (commentId: number, currentText: string) => {
+    setEditingCommentId(commentId);
+    setEditingCommentText(currentText);
+  };
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingCommentText('');
   };
 
   const handleUpdatePhoto = async (e: React.FormEvent) => {
@@ -647,39 +679,84 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                                 </Link>
                                 <span className="text-xs text-[var(--text-secondary)]">{formatDate(comment.createdAt)}</span>
                               </div>
-                              <p className="text-sm text-[var(--foreground)] mt-0.5">{comment.text}</p>
-                              <div className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                                <button
-                                  onClick={() => handleToggleCommentLike(comment.id)}
-                                  disabled={!currentUser || !token || commentLikeLoading[comment.id]}
-                                  className={`flex items-center gap-1 rounded-full px-3 py-1 transition-colors ${
-                                    comment.liked
-                                      ? 'bg-red-500/10 text-red-500'
-                                      : 'hover:bg-[var(--input-bg)] text-[var(--text-secondary)]'
-                                  } disabled:opacity-50 disabled:hover:bg-transparent`}
-                                >
-                                  <Heart
-                                    className={`w-4 h-4 ${
-                                      comment.liked ? 'fill-red-500 text-red-500' : 'text-[var(--foreground)]'
-                                    }`}
+                              
+                              {editingCommentId === comment.id ? (
+                                <div className="mt-2 flex items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={editingCommentText}
+                                    onChange={(e) => setEditingCommentText(e.target.value)}
+                                    maxLength={1000}
+                                    className="flex-1 bg-[var(--input-bg)] text-[var(--foreground)] rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-gray-200"
+                                    autoFocus
                                   />
-                                  {comment.likesCount > 0 && (
-                                    <span className="font-medium text-sm text-current">{comment.likesCount}</span>
-                                  )}
-                                </button>
-                                {commentLikeLoading[comment.id] && (
-                                  <Loader2 className="w-3 h-3 animate-spin text-[var(--text-secondary)]" />
-                                )}
-                              </div>
+                                  <button
+                                    onClick={() => handleEditComment(comment.id)}
+                                    disabled={!editingCommentText.trim() || updatingComment}
+                                    className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-all disabled:opacity-50"
+                                    title="Сохранить"
+                                  >
+                                    {updatingComment ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Check className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={cancelEditComment}
+                                    disabled={updatingComment}
+                                    className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-all disabled:opacity-50"
+                                    title="Отмена"
+                                  >
+                                    <XIcon className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <>
+                                  <p className="text-sm text-[var(--foreground)] mt-0.5">{comment.text}</p>
+                                  <div className="mt-2 flex items-center gap-2 text-xs text-[var(--text-secondary)]">
+                                    <button
+                                      onClick={() => handleToggleCommentLike(comment.id)}
+                                      disabled={!currentUser || !token || commentLikeLoading[comment.id]}
+                                      className={`flex items-center gap-1 rounded-full px-3 py-1 transition-colors ${
+                                        comment.liked
+                                          ? 'bg-red-500/10 text-red-500'
+                                          : 'hover:bg-[var(--input-bg)] text-[var(--text-secondary)]'
+                                      } disabled:opacity-50 disabled:hover:bg-transparent`}
+                                    >
+                                      <Heart
+                                        className={`w-4 h-4 ${
+                                          comment.liked ? 'fill-red-500 text-red-500' : 'text-[var(--foreground)]'
+                                        }`}
+                                      />
+                                      {comment.likesCount > 0 && (
+                                        <span className="font-medium text-sm text-current">{comment.likesCount}</span>
+                                      )}
+                                    </button>
+                                    {commentLikeLoading[comment.id] && (
+                                      <Loader2 className="w-3 h-3 animate-spin text-[var(--text-secondary)]" />
+                                    )}
+                                  </div>
+                                </>
+                              )}
                             </div>
-                            {currentUser && currentUser.email === comment.author.displayName && (
-                              <button
-                                onClick={() => handleDeleteComment(comment.id)}
-                                className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
-                                title="Удалить комментарий"
-                              >
-                                <Trash2 className="w-4 h-4 text-red-500" />
-                              </button>
+                            {currentUser && currentUser.email === comment.author.displayName && editingCommentId !== comment.id && (
+                              <div className="flex gap-1">
+                                <button
+                                  onClick={() => startEditComment(comment.id, comment.text)}
+                                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-blue-50 rounded transition-all"
+                                  title="Редактировать"
+                                >
+                                  <Edit2 className="w-4 h-4 text-blue-500" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteComment(comment.id)}
+                                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
+                                  title="Удалить"
+                                >
+                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                </button>
+                              </div>
                             )}
                           </div>
                         ))}

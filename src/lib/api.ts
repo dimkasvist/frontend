@@ -239,6 +239,19 @@ export async function addComment(
   return response.data;
 }
 
+export async function updateComment(
+  commentId: number,
+  text: string,
+  token: string
+): Promise<Comment> {
+  const response = await api.put<Comment>(
+    `/comments/${commentId}`,
+    { text },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+}
+
 export async function deleteComment(commentId: number, token: string): Promise<void> {
   await api.delete(`/comments/${commentId}`, {
     headers: { Authorization: `Bearer ${token}` },
