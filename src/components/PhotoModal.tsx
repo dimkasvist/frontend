@@ -83,16 +83,21 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
       setShowMoreMenu(false);
       setEditTitle(photo.title);
       setEditDescription(photo.description || '');
-      
-      // Load like status if logged in
-      if (token) {
-        getLikeStatus(photo.id, token)
-          .then(res => {
-            setLiked(res.liked);
-            setLikesCount(res.likesCount ?? photo.likesCount ?? 0);
-          })
-          .catch(() => {});
-      }
+    }
+  }, [photo?.id]);
+
+  // Load like status for all users (with or without auth)
+  useEffect(() => {
+    if (photo) {
+      getLikeStatus(photo.id, token)
+        .then(res => {
+          setLiked(res.liked || false);
+          setLikesCount(res.likesCount ?? photo.likesCount ?? 0);
+        })
+        .catch(() => {
+          // Fallback to photo data if API fails
+          setLikesCount(photo.likesCount || 0);
+        });
     }
   }, [photo?.id, token]);
 
@@ -101,7 +106,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
     if (showComments && photo) {
       loadComments();
     }
-  }, [showComments, photo?.id, token]);
+  }, [showComments, photo?.id]);
 
   const loadComments = async () => {
     if (!photo) return;

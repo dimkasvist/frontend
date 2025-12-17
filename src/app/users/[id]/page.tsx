@@ -10,15 +10,17 @@ import FollowersModal from '@/components/FollowersModal';
 import { getUser, getFeed, getUserLikedMedia, followUser, unfollowUser, checkFollowing, getFollowStats, getUserBoards } from '@/lib/api';
 import { getAvatarUrl } from '@/lib/avatar';
 import { Photo, User, Board } from '@/types/photo';
-import { Loader2, UserPlus, UserMinus } from 'lucide-react';
+import { Loader2, UserPlus, UserMinus, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
+import { useChat } from '@/lib/chat-context';
 
 export default function UserProfilePage() {
   const params = useParams();
   const userId = Number(params?.id);
   const { token } = useAuth();
+  const { openChat } = useChat();
 
   const [author, setAuthor] = useState<User | null>(null);
   const [authorLoading, setAuthorLoading] = useState(false);
@@ -317,31 +319,40 @@ export default function UserProfilePage() {
               </button>
             </div>
             
-            {/* Follow button */}
+            {/* Follow and Message buttons */}
             {token && author && currentUser?.id !== author.id && (
-              <button
-                onClick={handleFollowToggle}
-                disabled={followLoading}
-                className={`px-6 py-2 rounded-full font-medium text-sm transition-all flex items-center gap-2 ${
-                  isFollowing
-                    ? 'bg-[var(--input-bg)] text-[var(--foreground)] hover:bg-[var(--border-color)]'
-                    : 'bg-red-500 text-white hover:bg-red-600'
-                } disabled:opacity-50`}
-              >
-                {followLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : isFollowing ? (
-                  <>
-                    <UserMinus className="w-4 h-4" />
-                    Отписаться
-                  </>
-                ) : (
-                  <>
-                    <UserPlus className="w-4 h-4" />
-                    Подписаться
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={handleFollowToggle}
+                  disabled={followLoading}
+                  className={`px-6 py-2 rounded-full font-medium text-sm transition-all flex items-center gap-2 ${
+                    isFollowing
+                      ? 'bg-[var(--input-bg)] text-[var(--foreground)] hover:bg-[var(--border-color)]'
+                      : 'bg-red-500 text-white hover:bg-red-600'
+                  } disabled:opacity-50`}
+                >
+                  {followLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isFollowing ? (
+                    <>
+                      <UserMinus className="w-4 h-4" />
+                      Отписаться
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Подписаться
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => openChat(author.id)}
+                  className="px-6 py-2 rounded-full font-medium text-sm transition-all flex items-center gap-2 bg-[var(--input-bg)] text-[var(--foreground)] hover:bg-[var(--border-color)]"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Сообщение
+                </button>
+              </div>
             )}
           </div>
         </section>

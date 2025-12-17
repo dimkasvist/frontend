@@ -4,14 +4,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Photo } from '@/types/photo';
 import { getImageUrl, getVideoUrl } from '@/lib/api';
-import { MoreHorizontal, Play } from 'lucide-react';
+import { MoreHorizontal, Play, Share2 } from 'lucide-react';
 
 interface PhotoCardProps {
   photo: Photo;
   onClick: () => void;
+  onShare?: (photoId: number) => void;
 }
 
-export default function PhotoCard({ photo, onClick }: PhotoCardProps) {
+export default function PhotoCard({ photo, onClick, onShare }: PhotoCardProps) {
   const isVideo = photo.mediaType === 'VIDEO';
   const isGif = useMemo(() => {
     const type = photo.contentType?.toLowerCase() || '';
@@ -148,13 +149,21 @@ export default function PhotoCard({ photo, onClick }: PhotoCardProps) {
         {/* Overlay on hover - Pinterest style */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
         
-        {/* Action button - Pinterest style */}
-        <button
-          onClick={(e) => { e.stopPropagation(); }}
-          className="absolute bottom-2 right-2 p-2 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-gray-100"
-        >
-          <MoreHorizontal className="w-4 h-4 text-gray-700" />
-        </button>
+        {/* Action buttons - Pinterest style */}
+        {onShare && (
+          <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                onShare(photo.id);
+              }}
+              className="p-2 bg-white rounded-full hover:bg-gray-100"
+              title="Поделиться в чате"
+            >
+              <Share2 className="w-4 h-4 text-gray-700" />
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );

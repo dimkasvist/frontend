@@ -162,9 +162,9 @@ export async function toggleLike(photoId: number, token: string): Promise<LikeRe
   return response.data;
 }
 
-export async function getLikeStatus(photoId: number, token: string): Promise<LikeResponse> {
+export async function getLikeStatus(photoId: number, token?: string | null): Promise<LikeResponse> {
   const response = await api.get<LikeResponse>(`/media/${photoId}/likes`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
   });
   return response.data;
 }
@@ -426,4 +426,12 @@ export async function updateNotificationSettings(settings: UpdateNotificationSet
     headers: { Authorization: `Bearer ${token}` },
   });
   return response.data;
+}
+
+export async function searchUsers(token: string, query: string): Promise<User[]> {
+  const response = await api.get<{ users: User[]; currentPage: number; totalPages: number; totalItems: number }>('/users/search', {
+    params: { q: query },
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data.users;
 }

@@ -8,9 +8,12 @@ import Sidebar from '@/components/Sidebar';
 import PhotoGrid from '@/components/PhotoGrid';
 import UploadModal from '@/components/UploadModal';
 import PhotoModal from '@/components/PhotoModal';
+import ShareToChat from '@/components/ShareToChat';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
+import { useChat } from '@/lib/chat-context';
+import { sendMessageREST } from '@/lib/chat-api';
 
 export default function Home() {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -19,8 +22,12 @@ export default function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [photoToShare, setPhotoToShare] = useState<number | null>(null);
   const firstRenderRef = useRef(true);
+  const initialLoadRef = useRef(false);
   const { token } = useAuth();
+  const { openChat } = useChat();
   const router = useRouter();
 
   const loadPhotos = useCallback(async (nextCursor?: string | null, reset: boolean = false) => {
@@ -45,8 +52,11 @@ export default function Home() {
   }, [token]);
 
   useEffect(() => {
-    loadPhotos(null, true);
-  }, [loadPhotos]);
+    if (!initialLoadRef.current) {
+      initialLoadRef.current = true;
+      loadPhotos(null, true);
+    }
+  }, []);
 
   const handleLoadMore = useCallback(() => {
     if (!loading && hasMore) {
@@ -66,6 +76,37 @@ export default function Home() {
     setSelectedPhoto(photo);
   };
 
+  const handleShareClick = (photoId: number) => {
+    setPhotoToShare(photoId);
+    setShareModalOpen(true);
+  };
+
+  const handleChatSelect = async (chatId: number) => {
+    if (!token || !photoToShare) return;
+
+    try {
+      const chats = await import('@/lib/chat-api').then(m => m.getChats(token));
+      const selectedChat = chats.chats.find(c => c.id === chatId);
+      
+      if (selectedChat) {
+        await sendMessageREST(token, {
+          recipientId: selectedChat.user.id,
+          content: '',
+          messageType: 'SHARED_POST',
+          attachmentUrl: null,
+          sharedMediaId: photoToShare,
+        });
+        
+        openChat(selectedChat.user.id);
+      }
+    } catch (error) {
+      console.error('Error sharing post:', error);
+    } finally {
+      setShareModalOpen(false);
+      setPhotoToShare(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[var(--background)] transition-colors">
       <Sidebar onCreateClick={() => setUploadModalOpen(true)} />
@@ -83,6 +124,7 @@ export default function Home() {
           hasMore={hasMore}
           onLoadMore={handleLoadMore}
           onPhotoClick={handlePhotoClick}
+          onShare={handleShareClick}
           showInitialSkeleton={firstRenderRef.current && loading}
         />
       </motion.main>
@@ -97,6 +139,15 @@ export default function Home() {
         photo={selectedPhoto}
         onClose={() => setSelectedPhoto(null)}
         onDelete={handlePhotoDelete}
+      />
+
+      <ShareToChat
+        isOpen={shareModalOpen}
+        onClose={() => {
+          setShareModalOpen(false);
+          setPhotoToShare(null);
+        }}
+        onSelectChat={handleChatSelect}
       />
     </div>
   );

@@ -12,6 +12,7 @@ interface PhotoGridProps {
   hasMore: boolean;
   onLoadMore: () => void;
   onPhotoClick: (photo: Photo) => void;
+  onShare?: (photoId: number) => void;
   showInitialSkeleton?: boolean;
 }
 
@@ -21,6 +22,7 @@ export default function PhotoGrid({
   hasMore,
   onLoadMore,
   onPhotoClick,
+  onShare,
   showInitialSkeleton,
 }: PhotoGridProps) {
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -93,6 +95,7 @@ export default function PhotoGrid({
             key={photo.id}
             photo={photo}
             onClick={() => onPhotoClick(photo)}
+            onShare={onShare}
           />
         ))}
         {loading &&
