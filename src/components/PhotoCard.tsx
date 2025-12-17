@@ -85,7 +85,6 @@ export default function PhotoCard({ photo, onClick, onShare }: PhotoCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.33, 1, 0.68, 1] }}
-      layout
     >
       <div
         className="relative w-full rounded-2xl overflow-hidden bg-gray-200"
