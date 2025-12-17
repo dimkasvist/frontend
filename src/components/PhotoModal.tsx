@@ -744,17 +744,17 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                               <div className="flex gap-1">
                                 <button
                                   onClick={() => startEditComment(comment.id, comment.text)}
-                                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-blue-50 rounded transition-all"
+                                  className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-[var(--input-bg)] rounded-lg transition-all"
                                   title="Редактировать"
                                 >
-                                  <Edit2 className="w-4 h-4 text-blue-500" />
+                                  <Edit2 className="w-3.5 h-3.5 text-blue-500" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteComment(comment.id)}
-                                  className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-50 rounded transition-all"
+                                  className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-[var(--input-bg)] rounded-lg transition-all"
                                   title="Удалить"
                                 >
-                                  <Trash2 className="w-4 h-4 text-red-500" />
+                                  <Trash2 className="w-3.5 h-3.5 text-red-500" />
                                 </button>
                               </div>
                             )}
