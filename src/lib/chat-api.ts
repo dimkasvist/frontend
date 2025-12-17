@@ -20,8 +20,9 @@ const getWebSocketUrl = () => {
   }
   
   // Auto-detect protocol for deployment
+  // SockJS expects http/https URLs, not ws/wss - it handles the WebSocket upgrade internally
   if (typeof window !== 'undefined') {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const protocol = window.location.protocol; // 'http:' or 'https:'
     const host = window.location.host;
     return `${protocol}//${host}/ws`;
   }
