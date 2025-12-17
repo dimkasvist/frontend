@@ -740,7 +740,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                                 </>
                               )}
                             </div>
-                            {currentUser && currentUser.email === comment.author.displayName && editingCommentId !== comment.id && (
+                            {currentUser && currentUser.id === comment.author.id && editingCommentId !== comment.id && (
                               <div className="flex gap-1">
                                 <button
                                   onClick={() => startEditComment(comment.id, comment.text)}
