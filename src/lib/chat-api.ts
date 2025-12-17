@@ -12,7 +12,25 @@ import {
 } from '@/types/chat';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080/ws';
+
+// Determine WebSocket URL based on protocol
+const getWebSocketUrl = () => {
+  if (process.env.NEXT_PUBLIC_WS_URL) {
+    return process.env.NEXT_PUBLIC_WS_URL;
+  }
+  
+  // Auto-detect protocol for deployment
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.host;
+    return `${protocol}//${host}/ws`;
+  }
+  
+  // Fallback for server-side rendering
+  return 'http://localhost:8080/ws';
+};
+
+const WS_URL = typeof window !== 'undefined' ? getWebSocketUrl() : (process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8080/ws');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
