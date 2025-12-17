@@ -33,7 +33,6 @@ export default function UploadModal({ isOpen, onClose, onSuccess }: UploadModalP
   };
 
   const processFile = (selectedFile: File) => {
-    // Validate file type
     const imageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     const videoTypes = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-matroska'];
     const validTypes = [...imageTypes, ...videoTypes];
@@ -43,7 +42,6 @@ export default function UploadModal({ isOpen, onClose, onSuccess }: UploadModalP
       return;
     }
 
-    // Validate file size (up to 100MB)
     const maxSizeMb = 100;
     if (selectedFile.size > maxSizeMb * 1024 * 1024) {
       setError(`Максимальный размер файла — ${maxSizeMb} МБ`);
@@ -109,15 +107,12 @@ export default function UploadModal({ isOpen, onClose, onSuccess }: UploadModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/60"
         onClick={handleClose}
       />
 
-      {/* Modal */}
       <div className="relative bg-[var(--card-bg)] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-xl">
-        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
           <h2 className="text-xl font-semibold text-[var(--foreground)]">Создать дим</h2>
           <button
@@ -128,10 +123,8 @@ export default function UploadModal({ isOpen, onClose, onSuccess }: UploadModalP
           </button>
         </div>
 
-        {/* Content */}
         <form onSubmit={handleSubmit} className="p-6">
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Upload area */}
             <div className="flex-1">
               {!preview ? (
                 <div
@@ -190,7 +183,6 @@ export default function UploadModal({ isOpen, onClose, onSuccess }: UploadModalP
               />
             </div>
 
-            {/* Form fields */}
             <div className="flex-1 flex flex-col gap-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--foreground)] mb-1">

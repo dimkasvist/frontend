@@ -74,7 +74,6 @@ export default function SaveToBoard({ mediaId, variant = 'icon', className = '' 
       setNewBoardName('');
       setCreatingNew(false);
       
-      // Auto-save to new board
       await handleSaveToBoard(board.id);
     } catch (error) {
       console.error('Error creating board:', error);
@@ -129,7 +128,6 @@ export default function SaveToBoard({ mediaId, variant = 'icon', className = '' 
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {/* Create new board */}
                   {creatingNew ? (
                     <div className="p-4 bg-[var(--input-bg)] rounded-2xl">
                       <input
@@ -175,7 +173,6 @@ export default function SaveToBoard({ mediaId, variant = 'icon', className = '' 
                     </button>
                   )}
 
-                  {/* Existing boards */}
                   {boards.map((board) => {
                     const isSaved = savedBoards.has(board.id);
                     const isSaving = saving === board.id;

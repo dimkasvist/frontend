@@ -66,7 +66,6 @@ export default function ChatWindow({
           const existingIds = new Set(prev.map(m => m.id));
           const uniqueNewMessages = messagesForThisChat.filter(msg => !existingIds.has(msg.id));
           if (uniqueNewMessages.length > 0) {
-            // Mark new messages as read automatically
             uniqueNewMessages.forEach(msg => {
               if (msg.sender.id !== user?.id && chatService) {
                 chatService.markAsRead(msg.id);
@@ -74,7 +73,6 @@ export default function ChatWindow({
             });
             return [...prev, ...uniqueNewMessages];
           }
-          // Check if any existing messages were updated (edit)
           const updatedMessages = prev.map(prevMsg => {
             const updated = messagesForThisChat.find(newMsg => newMsg.id === prevMsg.id);
             return updated || prevMsg;
@@ -128,7 +126,6 @@ export default function ChatWindow({
     }
   }, [statusUpdates]);
 
-  // Scroll to bottom after initial load
   useEffect(() => {
     if (!loading && messages.length > 0) {
       scrollToBottom(true);

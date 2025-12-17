@@ -13,21 +13,17 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
-// Determine WebSocket URL based on protocol
 const getWebSocketUrl = () => {
   if (process.env.NEXT_PUBLIC_WS_URL) {
     return process.env.NEXT_PUBLIC_WS_URL;
   }
   
-  // Auto-detect protocol for deployment
-  // SockJS expects http/https URLs, not ws/wss - it handles the WebSocket upgrade internally
   if (typeof window !== 'undefined') {
     const protocol = window.location.protocol; // 'http:' or 'https:'
     const host = window.location.host;
     return `${protocol}//${host}/ws`;
   }
   
-  // Fallback for server-side rendering
   return 'http://localhost:8080/ws';
 };
 

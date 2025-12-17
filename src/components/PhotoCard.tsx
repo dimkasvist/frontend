@@ -29,7 +29,6 @@ export default function PhotoCard({ photo, onClick, onShare }: PhotoCardProps) {
   const [gifPosterSrc, setGifPosterSrc] = useState<string>(gifStillFallback);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  // Извлекаем первый кадр GIF, если постера нет
   useEffect(() => {
     if (!isGif || gifStillUrl) return;
 
@@ -47,13 +46,10 @@ export default function PhotoCard({ photo, onClick, onShare }: PhotoCardProps) {
         ctx.drawImage(img, 0, 0);
         const dataUrl = canvas.toDataURL('image/png');
         setGifStillUrl(dataUrl);
-      } catch {
-        // Если не удалось (CORS), просто остаёмся без постера
-      }
+      } catch {}
     };
   }, [gifStillUrl, isGif, photo.url]);
 
-  // Выбираем источник превью для GIF
   useEffect(() => {
     const src = gifStillUrl
       ? gifStillUrl
@@ -145,10 +141,8 @@ export default function PhotoCard({ photo, onClick, onShare }: PhotoCardProps) {
           />
         )}
 
-        {/* Overlay on hover - Pinterest style */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-200" />
         
-        {/* Action buttons - Pinterest style */}
         {onShare && (
           <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button

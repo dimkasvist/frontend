@@ -67,7 +67,6 @@ export default function FollowButton({ userId, variant = 'default', className = 
     }
   };
 
-  // Don't show button if not logged in or if it's current user
   if (!token || !user || user.id === userId) {
     return null;
   }

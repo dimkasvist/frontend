@@ -60,7 +60,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
   const [updatingComment, setUpdatingComment] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
-  // Lock body scroll when modal is open
   useEffect(() => {
     if (photo) {
       document.body.style.overflow = 'hidden';
@@ -72,10 +71,8 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
     };
   }, [photo]);
 
-  // Reset state when photo changes
   useEffect(() => {
     if (photo) {
-      // Reset all state for new photo
       setLiked(false);
       setLikesCount(photo.likesCount || 0);
       setCommentsCount(photo.commentsCount || 0);
@@ -90,7 +87,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
     }
   }, [photo?.id]);
 
-  // Load like status for all users (with or without auth)
   useEffect(() => {
     if (photo) {
       getLikeStatus(photo.id, token)
@@ -99,13 +95,11 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
           setLikesCount(res.likesCount ?? photo.likesCount ?? 0);
         })
         .catch(() => {
-          // Fallback to photo data if API fails
           setLikesCount(photo.likesCount || 0);
         });
     }
   }, [photo?.id, token]);
 
-  // Load comments when section is opened or photo changes
   useEffect(() => {
     if (showComments && photo) {
       loadComments();
@@ -143,7 +137,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
       await deletePhoto(photo.id, token);
       onDelete(photo.id);
       onClose();
-    } catch (err: unknown) {
+    } catch (err) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
         if (axiosError.response?.status === 403) {
@@ -265,7 +259,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
         description: editDescription.trim() || undefined,
       }, token);
       
-      // Update local photo state
       Object.assign(photo, {
         title: updated.title,
         description: updated.description,
@@ -273,7 +266,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
       
       setShowEditModal(false);
       setShowMoreMenu(false);
-    } catch (err: unknown) {
+    } catch (err) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
         if (axiosError.response?.status === 403) {
@@ -321,7 +314,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {/* Backdrop */}
           <motion.div
             className="absolute inset-0 bg-black/80"
             onClick={onClose}
@@ -330,7 +322,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
             exit={{ opacity: 0 }}
           />
 
-          {/* Close button - outside modal */}
           <motion.button
             onClick={onClose}
             className="absolute top-4 left-4 z-50 p-3 bg-[var(--card-bg)]/90 backdrop-blur rounded-full shadow-lg hover:bg-[var(--card-bg)] transition-colors outline-none focus:outline-none"
@@ -342,7 +333,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
             <X className="w-5 h-5 text-[var(--foreground)]" />
           </motion.button>
 
-          {/* Modal */}
           <motion.div
             className="relative bg-[var(--card-bg)] rounded-[32px] w-full max-w-5xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col md:flex-row"
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
@@ -350,7 +340,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
             transition={{ type: 'spring', stiffness: 260, damping: 25 }}
           >
-            {/* Image */}
             <div className="flex-1 bg-[var(--card-bg)] flex items-center justify-center min-h-[300px] md:min-h-[600px] overflow-hidden relative group/image">
               <div className="relative w-full h-full min-h-[300px] md:min-h-[600px]">
                 {photo.mediaType === 'VIDEO' ? (
@@ -375,7 +364,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                 )}
               </div>
               
-              {/* Expand button */}
               <button
                 onClick={() => setShowFullscreen(true)}
                 className="absolute bottom-4 right-4 p-3 bg-[var(--card-bg)]/90 hover:bg-[var(--card-bg)] backdrop-blur rounded-full shadow-lg transition-all opacity-0 group-hover/image:opacity-100"
@@ -385,7 +373,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
               </button>
             </div>
 
-            {/* Fullscreen overlay */}
             {showFullscreen && (
               <div 
                 className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
@@ -421,12 +408,9 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
               </div>
             )}
 
-            {/* Info panel */}
             <div className="w-full md:w-[400px] flex flex-col overflow-hidden">
-              {/* Top actions bar */}
               <div className="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
                 <div className="flex items-center gap-4">
-                  {/* Like button */}
                   <button
                     onClick={handleLike}
                     disabled={!currentUser || likingInProgress}
@@ -438,7 +422,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                     <span className="font-semibold text-[var(--foreground)]">{likesCount}</span>
                   </button>
                   
-                  {/* Comments button */}
                   <button
                     onClick={() => setShowComments(!showComments)}
                     className="flex items-center gap-2 hover:bg-[var(--input-bg)] rounded-full p-2 transition-colors"
@@ -449,10 +432,8 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                     )}
                   </button>
                   
-                  {/* Save to Board */}
                   <SaveToBoard mediaId={photo.id} variant="icon" />
                   
-                  {/* Download */}
                   <button
                     onClick={handleDownload}
                     className="p-2 hover:bg-[var(--input-bg)] rounded-full transition-colors"
@@ -461,10 +442,8 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                     <Download className="w-6 h-6 text-[var(--foreground)]" />
                   </button>
                   
-                  {/* Share */}
                   <ShareButton mediaId={photo.id} variant="icon" />
                   
-                  {/* More options */}
                   {currentUser?.id === photo.author?.id && (
                     <div className="relative">
                       <button 
@@ -501,9 +480,7 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                 </div>
               </div>
 
-              {/* Content area */}
               <div className="flex-1 overflow-y-auto p-5">
-                {/* Author */}
                 {photo.author && (
                   <Link
                     href={`/users/${photo.author.id}`}
@@ -534,24 +511,20 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                   </Link>
                 )}
 
-                {/* Title */}
                 <h1 className="text-xl font-bold text-[var(--foreground)] mb-2 leading-tight">
                   {photo.title}
                 </h1>
 
-                {/* Description */}
                 {photo.description && (
                   <p className="text-[var(--text-secondary)] text-sm mb-4 leading-relaxed">{photo.description}</p>
                 )}
 
-                {/* Error */}
                 {error && (
                   <div className="mb-4 p-3 bg-red-500/20 text-red-500 text-sm rounded-2xl border border-red-500/30">
                     {error}
                   </div>
                 )}
 
-                {/* Delete confirmation */}
                 {showDeleteConfirm && (
                   <div className="mb-4 p-4 bg-[var(--input-bg)] rounded-xl border border-[var(--border-color)]">
                     <p className="text-sm text-[var(--foreground)] mb-3">
@@ -575,7 +548,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                   </div>
                 )}
 
-                {/* Edit modal */}
                 {showEditModal && (
                   <form onSubmit={handleUpdatePhoto} className="mb-4 p-4 bg-[var(--input-bg)] rounded-xl border border-[var(--border-color)]">
                     <h3 className="text-sm font-semibold text-[var(--foreground)] mb-3">
@@ -631,7 +603,6 @@ export default function PhotoModal({ photo, onClose, onDelete }: PhotoModalProps
                   </form>
                 )}
 
-                {/* Comments section */}
                 {showComments && (
                   <div className="mt-4 pt-4 border-t border-[var(--border-color)]">
                     <h3 className="font-semibold text-[var(--foreground)] mb-3">

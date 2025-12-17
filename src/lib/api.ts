@@ -23,15 +23,12 @@ import {
   UpdateNotificationSettingsRequest,
 } from '@/types/photo';
 
-// Используем относительный базовый путь, чтобы проходить через rewrite Next.js и избегать CORS при разработке.
-// Для продакшена можно задать абсолютный домен через NEXT_PUBLIC_API_URL.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
 });
 
-// Публичные эндпоинты
 interface FeedParams {
   cursor?: string | null;
   size?: number;
@@ -90,7 +87,6 @@ export async function getUser(id: number): Promise<User> {
   return response.data;
 }
 
-// Защищённые эндпоинты (требуют токен)
 export async function getCurrentUser(token: string): Promise<User> {
   const response = await api.get<User>('/users/me', {
     headers: { Authorization: `Bearer ${token}` },
@@ -146,7 +142,6 @@ function makeAbsolute(url: string): string {
 }
 
 export function getImageUrl(imageUrl: string): string {
-  // Если уже абсолютный URL (S3/MinIO) — возвращаем как есть
   return makeAbsolute(imageUrl);
 }
 
@@ -154,7 +149,6 @@ export function getVideoUrl(videoUrl: string): string {
   return makeAbsolute(videoUrl);
 }
 
-// Лайки
 export async function toggleLike(photoId: number, token: string): Promise<LikeResponse> {
   const response = await api.post<LikeResponse>(`/media/${photoId}/likes`, null, {
     headers: { Authorization: `Bearer ${token}` },
@@ -208,7 +202,6 @@ export async function getUserLikedMedia(
   return response.data;
 }
 
-// Комментарии
 export async function getComments(
   photoId: number,
   cursor?: string | null,
@@ -272,7 +265,6 @@ export async function getCommentLikeStatus(commentId: number, token: string): Pr
   return response.data;
 }
 
-// Boards
 export async function createBoard(data: CreateBoardRequest, token: string): Promise<Board> {
   const response = await api.post<Board>('/boards', data, {
     headers: { Authorization: `Bearer ${token}` },
@@ -337,10 +329,6 @@ export async function getBoardMedia(boardId: number, page: number = 0, size: num
   return response.data;
 }
 
-// ============================================
-// Follow API
-// ============================================
-
 export async function followUser(userId: number, token: string): Promise<Follow> {
   const response = await api.post<Follow>(`/follow/${userId}`, null, {
     headers: { Authorization: `Bearer ${token}` },
@@ -384,10 +372,6 @@ export async function getFollowStats(userId: number, token?: string | null): Pro
   return response.data;
 }
 
-// ============================================
-// Notifications API
-// ============================================
-
 export async function getNotifications(page: number = 0, size: number = 20, token: string): Promise<NotificationListResponse> {
   const response = await api.get<NotificationListResponse>('/notifications', {
     params: { page, size },
@@ -422,10 +406,6 @@ export async function markAllNotificationsAsRead(token: string): Promise<void> {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
-
-// ============================================
-// Notification Settings API
-// ============================================
 
 export async function getNotificationSettings(token: string): Promise<NotificationSettings> {
   const response = await api.get<NotificationSettings>('/notification-settings', {
