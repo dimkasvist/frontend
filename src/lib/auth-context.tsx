@@ -32,8 +32,9 @@ declare global {
     google?: {
       accounts: {
         id: {
-          initialize: (config: any) => void;
+          initialize: (config: { client_id: string; callback: (response: { credential: string }) => void; auto_select?: boolean }) => void;
           prompt: (callback?: (notification: any) => void) => void;
+          renderButton: (element: HTMLElement, config: object) => void;
         };
       };
     };
